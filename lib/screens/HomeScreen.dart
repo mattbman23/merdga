@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:merdga/components/MangaCard.dart';
+import 'package:merdga/components/homeScreen/MangaCard.dart';
+import 'package:merdga/components/homeScreen/MangaList.dart';
 import 'package:merdga/constants/constants.dart';
 import 'package:merdga/widgets/BotNavItem.dart';
 import 'package:web_scraper/web_scraper.dart';
@@ -13,6 +14,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int selectedNavIndex = 0;
   bool mangaLoaded = false;
   List<Map<String, dynamic>> mangaList;
+  List<Map<String, dynamic>> mangaUrlList;
 
   void navBarTap(int index) {
     setState(() {
@@ -29,7 +31,11 @@ class _HomeScreenState extends State<HomeScreen> {
         ['src', 'alt'],
       );
 
-      print(mangaList);
+      mangaUrlList = webscraper.getElement(
+        'div.container-main-left > div.panel-content-homepage > div > a',
+        ['href'],
+      );
+
       setState(() {
         mangaLoaded = true;
       });
@@ -44,44 +50,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Size screenSize = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
         title: Text("Merdga"),
         backgroundColor: Constants.darkgray,
       ),
       body: mangaLoaded
-          ? Container(
-              height: screenSize.height,
-              width: double.infinity,
-              color: Constants.balck,
-              child: SingleChildScrollView(
-                physics: BouncingScrollPhysics(),
-                child: Wrap(
-                  runSpacing: 10,
-                  spacing: 5,
-                  children: [
-                    Container(
-                      width: double.infinity,
-                      height: 30,
-                      padding: EdgeInsets.only(left: 20),
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        "${mangaList.length} mangas",
-                        style: TextStyle(
-                          fontSize: 23,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                    for (int i = 0; i < mangaList.length; i++)
-                      MangaCard(
-                        mangaImg: mangaList[i]['attributes']['src'],
-                        mangaTitle: mangaList[i]['attributes']['alt'],
-                      ),
-                  ],
-                ),
-              ),
+          ? MangaList(
+              mangaList: mangaList,
+              mangaUrlList: mangaUrlList,
             )
           : Center(child: CircularProgressIndicator()),
       bottomNavigationBar: BottomNavigationBar(
